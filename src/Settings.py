@@ -2,9 +2,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings, extra="ignore"):
-    development: bool = False
     listen_host: str = "0.0.0.0"
     listen_port: int = 8000
+    allowed_hosts: str = "localhost:*,127.0.0.1:*"
+    allowed_origins: str = "http://localhost:*,http://127.0.0.1:*"
 
     log_dir: str = "logs"
     log_level: str = "INFO"

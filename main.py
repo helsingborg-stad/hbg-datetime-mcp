@@ -1,29 +1,15 @@
 import logging
 
 from mcp.server import MCPServer
-import uvicorn
+from mcp.server.transport_security import TransportSecuritySettings
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from src.Settings import settings
-from src.logger.middleware import RequestLoggingMiddleware
-from src.logger.setup import setup_logging
-from src.logger.tool import log_tool_errors
-
-setup_logging(
-    log_dir=settings.log_dir,
-    level=settings.log_level,
-    max_bytes=settings.log_max_bytes,
-    backup_count=settings.log_backup_count,
-    console=settings.log_to_console,
-)
-logger = logging.getLogger("hbg.main")
 
 mcp = MCPServer("HBG DateTime MCP")
-app = RequestLoggingMiddleware(mcp.streamable_http_app())
 
 
 @mcp.tool()
-@log_tool_errors
 async def get_time_utc():
     """Get the current time in UTC as an ISO 8601 string.
 
@@ -34,7 +20,6 @@ async def get_time_utc():
 
 
 @mcp.tool()
-@log_tool_errors
 async def get_time_by_zone(zone: str):
     """Get the current time in the specified time zone as an ISO 8601 string.
 
@@ -48,16 +33,20 @@ async def get_time_by_zone(zone: str):
     return {"time": datetime.now(ZoneInfo(zone)).isoformat()}
 
 if __name__ == "__main__":
+    logger = logging.getLogger("hbg")
     logger.info(
-        "Starting Datetime MCP on %s:%s", settings.listen_host, settings.listen_port)
-
-    uvicorn.run(
-        'main:app',
-        host=settings.listen_host,
-        port=settings.listen_port,
-        reload=settings.development,
-        # Keep the root logger config from setup_logging; the middleware above
-        # is the single source of request logs.
-        log_config=None,
-        access_log=False,
-    )
+        "Starting Datetime MCP on %s:%s with allowed hosts %s and allowed origins %s", settings.listen_host, settings.listen_port, settings.allowed_hosts, settings.allowed_origins)
+    try:
+        mcp.run(
+            "streamable-http",
+            stateless_http=True,
+            host=settings.listen_host,
+            port=settings.listen_port,
+            transport_security=TransportSecuritySettings(
+                enable_dns_rebinding_protection=True,
+                allowed_hosts=settings.allowed_hosts.split(","),
+                allowed_origins=settings.allowed_origins.split(","),
+            )
+        )
+    except KeyboardInterrupt:
+        logger.info("Stopped Datetime MCP")

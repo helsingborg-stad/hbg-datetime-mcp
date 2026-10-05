@@ -20,6 +20,16 @@ async def get_time_utc():
 
 
 @mcp.tool()
+async def get_time_unix():
+    """Get the current time as a Unix timestamp.
+
+    Returns:
+        dict: A dictionary containing the current time as a Unix timestamp, with the key "time".
+    """
+    return {"time": int(datetime.now(timezone.utc).timestamp())}
+
+
+@mcp.tool()
 async def get_time_by_zone(zone: str):
     """Get the current time in the specified time zone as an ISO 8601 string.
 

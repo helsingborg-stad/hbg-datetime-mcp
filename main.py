@@ -30,6 +30,48 @@ async def get_time_unix():
 
 
 @mcp.tool()
+async def iso_to_unix(iso_time: str):
+    """Convert an ISO 8601 time string to a Unix timestamp.
+
+    Args:
+        iso_time (str): The ISO 8601 time string to convert.
+
+    Returns:
+        dict: A dictionary containing the Unix timestamp corresponding to the given ISO 8601 time string, with the key "time".
+    """
+    dt = datetime.fromisoformat(iso_time)
+    return {"time": int(dt.timestamp())}
+
+
+@mcp.tool()
+async def unix_to_iso(unix_time: int):
+    """Convert a Unix timestamp to an ISO 8601 time string.
+
+    Args:
+        unix_time (int): The Unix timestamp to convert.
+
+    Returns:
+        dict: A dictionary containing the ISO 8601 time string corresponding to the given Unix timestamp, with the key "time".
+    """
+    dt = datetime.fromtimestamp(unix_time, timezone.utc)
+    return {"time": dt.isoformat()}
+
+
+@mcp.tool()
+async def get_weekday_name(iso_time: str):
+    """Get the name of the weekday for a given ISO 8601 time string.
+
+    Args:
+        iso_time (str): The ISO 8601 time string to get the weekday for.
+
+    Returns:
+        dict: A dictionary containing the name of the weekday corresponding to the given ISO 8601 time string, with the key "weekday".
+    """
+    dt = datetime.fromisoformat(iso_time)
+    return {"weekday": dt.strftime("%A")}
+
+
+@mcp.tool()
 async def get_time_by_zone(zone: str):
     """Get the current time in the specified time zone as an ISO 8601 string.
 

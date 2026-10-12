@@ -30,31 +30,38 @@ async def get_time_unix():
 
 
 @mcp.tool()
-async def iso_to_unix(iso_time: str):
-    """Convert an ISO 8601 time string to a Unix timestamp.
+async def iso_to_unix(iso_times: list[str]):
+    """Convert ISO 8601 time strings to Unix timestamps.
 
     Args:
-        iso_time (str): The ISO 8601 time string to convert.
+        iso_times (list[str]): The ISO 8601 time strings to convert.
 
     Returns:
-        dict: A dictionary containing the Unix timestamp corresponding to the given ISO 8601 time string, with the key "time".
+        list[dict]: ISO 8601 strings and their Unix timestamps in input order.
     """
-    dt = datetime.fromisoformat(iso_time)
-    return {"time": int(dt.timestamp())}
+    return [
+        {"iso": dt.isoformat(), "unix": int(dt.timestamp())}
+        for dt in (datetime.fromisoformat(iso_time) for iso_time in iso_times)
+    ]
 
 
 @mcp.tool()
-async def unix_to_iso(unix_time: int):
-    """Convert a Unix timestamp to an ISO 8601 time string.
+async def unix_to_iso(unix_times: list[int], zone: str = "UTC"):
+    """Convert Unix timestamps to ISO 8601 time strings.
 
     Args:
-        unix_time (int): The Unix timestamp to convert.
+        unix_times (list[int]): The Unix timestamps to convert.
+        zone (str): IANA time zone name for the ISO strings. Defaults to UTC.
 
     Returns:
-        dict: A dictionary containing the ISO 8601 time string corresponding to the given Unix timestamp, with the key "time".
+        list[dict]: ISO 8601 strings in the specified zone and their Unix timestamps in input order.
     """
-    dt = datetime.fromtimestamp(unix_time, timezone.utc)
-    return {"time": dt.isoformat()}
+    time_zone = ZoneInfo(zone)
+    return [
+        {"iso": datetime.fromtimestamp(
+            unix_time, time_zone).isoformat(), "unix": unix_time}
+        for unix_time in unix_times
+    ]
 
 
 @mcp.tool()

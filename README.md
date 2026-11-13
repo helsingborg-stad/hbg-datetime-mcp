@@ -26,3 +26,15 @@ instead, including daylight saving time changes:
 
 This returns ISO strings `2024-01-01T01:00:00+01:00` and
 `2024-07-01T02:00:00+02:00` alongside the original Unix timestamps.
+
+## Publishing the Docker image
+
+In GitHub Actions, run **Publish Docker image** manually and select the branch
+or tag to build. The workflow publishes the selected revision to
+`ghcr.io/helsingborg-stad/hbg-datetime-mcp`, tagged with the selected branch
+or tag name. Characters that are invalid in Docker tags, such as `/`, are
+replaced with `-`; names that normalize to the same tag will overwrite it.
+The workflow does not automatically publish a `latest` tag.
+
+The workflow uses `GITHUB_TOKEN` with permission to write packages. Package
+visibility and access can be managed in the GitHub Container Registry settings.
